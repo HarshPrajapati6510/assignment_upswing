@@ -1,0 +1,184 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-6">
+      <p-card header="Products List">
+        <div class="m-0">
+          <div class="mb-3 d-flex justify-content-end">
+            <p-button label="Add" icon="pi pi-plus" (click)="onClickAdd()" />
+          </div>
+          <div>
+            <p-table
+              [columns]="displayColumn"
+              [value]="productsDataList"
+              class="product-table"
+            >
+              <ng-template pTemplate="header" let-columns>
+                <tr>
+                  @for (col of columns; track $index) {
+                  <th>
+                    {{ col.label }}
+                  </th>
+                  }
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-rowData let-columns="columns" let-rowIndex="rowIndex">
+                <tr>
+                  @for (col of columns;let i=$index; track i) {
+                  @if(col?.field!=='action'){
+                  <td class="table-border">
+                    {{ rowData[col.field] }}
+                  </td>
+                  }@else{
+                  <td class="ps-0">
+                    <p-button
+                      [rounded]="true"
+                      [text]="true"
+                      (click)="onClickEdit(rowData)"
+                    >
+                      <i class="pi pi-pen-to-square p-8"></i>
+                    </p-button>
+                    <p-button [rounded]="true" [text]="true" (click)="onClickRemoveProduct(rowIndex)">
+                      <i class="pi pi-trash p-8"></i>
+                    </p-button>
+                  </td>
+                  } }
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="emptymessage">
+                <tr>
+                  <td class="text-center" [colSpan]="displayColumn.length">
+                    No Products found
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
+        </div>
+      </p-card>
+    </div>
+    <div class="col-6">
+      <p-card header="Products chart" >
+        <p class="m-0">
+          @if(productsChartData.length){
+            @defer(){
+              <ngx-charts-bar-vertical
+                [results]="productsChartData"
+                [gradient]="productsChartOptions.gradient"
+                [xAxis]="productsChartOptions.showXAxis"
+                [yAxis]="productsChartOptions.showYAxis"
+                [legend]="productsChartOptions.showLegend"
+                [showXAxisLabel]="productsChartOptions.showXAxisLabel"
+                [showYAxisLabel]="productsChartOptions.showYAxisLabel"
+                [xAxisLabel]="productsChartOptions.xAxisLabel"
+                [yAxisLabel]="productsChartOptions.yAxisLabel"
+              >
+              </ngx-charts-bar-vertical>
+
+            }
+          }@else{
+            <div class="d-flex align-items-center justify-content-center">
+             <p>Products Data Not Found.</p>
+            </div>
+          }
+        </p>
+      </p-card>
+    </div>
+  </div>
+</div>
+
+<p-dialog [header]="type=='add'?'Add Products':'Edit Products'" [modal]="true"  (onHide)="modalClose()" [(visible)]="isVisibleDialogue" [draggable]="false" >
+  <form [formGroup]="productsForm" class="mt-1">
+    <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
+      <label for="name" class="font-semibold">Product name</label>
+      <div>
+        <input
+          pInputText
+          id="name"
+          formControlName="name"
+          [ngClass]="{
+            'invalid-message':
+              (fc['name']?.touched || fc['name']?.dirty || isSubmitted) &&
+              fc['name'].invalid
+          }"
+          class="flex-auto"
+          autocomplete="off"
+        />
+        @if((fc['name']?.touched ||
+        fc['name']?.dirty || isSubmitted) &&
+        fc['name']?.invalid) {
+
+          @if((fc['name']?.errors &&
+          fc['name']?.errors['required'])) {
+        <div class="text-danger">Products name is required.</div>
+        } }
+      </div>
+    </div>
+    <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
+      <label for="price" class="font-semibold">Price</label>
+      <div>
+        <input
+        pInputText
+        id="price"
+        formControlName="price"
+        [ngClass]="{
+          'invalid-message':
+            (fc['price']?.touched || fc['price']?.dirty || isSubmitted) &&
+            fc['price'].invalid
+        }"
+        class="flex-auto"
+        autocomplete="off"
+      />
+        @if((fc['price']?.touched ||
+        fc['price']?.dirty || isSubmitted) &&
+        fc['price']?.invalid) {
+
+          @if((fc['price']?.errors &&
+          fc['price']?.errors['required'])) {
+             <div class="text-danger">Products price is required.</div>
+          } 
+
+          @if((fc['price']?.errors &&
+          fc['price']?.errors['pattern'])) {
+             <div class="text-danger">Only number allowed.</div>
+          } 
+       }
+      </div>
+     
+    </div>
+    <div class="d-flex align-items-center justify-content-between gap-3 mb-5">
+      <label for="email" class="font-semibold">Category</label>
+
+      <div>
+        <input
+          pInputText
+          id="email"
+          formControlName="category"
+          class="flex-auto"
+          autocomplete="off"
+          [ngClass]="{
+            'invalid-message':
+              (fc['category']?.touched || fc['category']?.dirty || isSubmitted) &&
+              fc['category'].invalid
+          }"
+        />
+        @if((fc['category']?.touched ||
+        fc['category']?.dirty || isSubmitted) &&
+        fc['category']?.invalid) {
+
+          @if((fc['category']?.errors &&
+          fc['category']?.errors['required'])) {
+        <div class="text-danger">Products category is required.</div>
+        } }
+
+      </div>
+    </div>
+    <div class="d-flex justify-content-end gap-2">
+      <p-button
+        label="Cancel"
+        severity="secondary"
+        (onClick)="isVisibleDialogue = false"
+      />
+      <p-button label="Save" (onClick)="onClickSave()" />
+    </div>
+  </form>
+</p-dialog>
